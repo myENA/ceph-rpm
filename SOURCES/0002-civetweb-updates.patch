@@ -1,0 +1,47 @@
+diff --git a/src/rgw/rgw_civetweb.cc b/src/rgw/rgw_civetweb.cc
+index 93a8a030ac..41b089279f 100644
+--- a/src/rgw/rgw_civetweb.cc
++++ b/src/rgw/rgw_civetweb.cc
+@@ -35,7 +35,7 @@ RGWCivetWeb::RGWCivetWeb(mg_connection* const conn)
+     explicit_conn_close(false),
+     txbuf(*this)
+ {
+-    sockaddr *lsa = mg_get_local_addr(conn);
++    const sockaddr *lsa = mg_get_local_addr(conn);
+     switch(lsa->sa_family) {
+     case AF_INET:
+ 	port = ntohs(((struct sockaddr_in*)lsa)->sin_port);
+@@ -77,9 +77,8 @@ void RGWCivetWeb::init_env(CephContext *cct)
+   }
+ 
+   for (int i = 0; i < info->num_headers; i++) {
+-    const struct mg_request_info::mg_header* header = &info->http_headers[i];
+-    const boost::string_ref name(header->name);
+-    const auto& value = header->value;
++    const boost::string_ref name(info->http_headers[i].name);
++    const auto& value = info->http_headers[i].value;
+ 
+     if (boost::algorithm::iequals(name, "content-length")) {
+       env.set("CONTENT_LENGTH", value);
+@@ -112,7 +111,7 @@ void RGWCivetWeb::init_env(CephContext *cct)
+ 
+   env.set("REQUEST_METHOD", info->request_method);
+   env.set("REQUEST_URI", info->request_uri); // get the full uri, we anyway handle abs uris later
+-  env.set("SCRIPT_URI", info->uri); /* FIXME */
++  env.set("SCRIPT_URI", info->local_uri); /* FIXME */
+   if (info->query_string) {
+     env.set("QUERY_STRING", info->query_string);
+   }
+diff --git a/src/rgw/rgw_civetweb_frontend.cc b/src/rgw/rgw_civetweb_frontend.cc
+index 8cf7a20b0d..0c8bb5c453 100644
+--- a/src/rgw/rgw_civetweb_frontend.cc
++++ b/src/rgw/rgw_civetweb_frontend.cc
+@@ -51,8 +51,6 @@ int RGWCivetWebFrontend::run()
+                    std::to_string(g_conf->rgw_thread_pool_size));
+   set_conf_default(conf_map, "decode_url", "no");
+   set_conf_default(conf_map, "enable_keep_alive", "yes");
+-  set_conf_default(conf_map, "validate_http_method", "no");
+-  set_conf_default(conf_map, "canonicalize_url_path", "no");
+   set_conf_default(conf_map, "enable_auth_domain_check", "no");
+   conf->get_val("port", "80", &port_str);
+   std::replace(port_str.begin(), port_str.end(), '+', ',');

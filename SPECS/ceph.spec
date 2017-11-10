@@ -154,6 +154,7 @@ BuildRequires:	xfsprogs
 BuildRequires:	xfsprogs-devel
 BuildRequires:	xmlstarlet
 BuildRequires:	yasm
+BuildRequires:	fcgi-devel
 
 #################################################################################
 # distro-conditional dependencies
@@ -811,7 +812,7 @@ env | sort
 %define _smp_ncpus %(echo %{_smp_mflags} | sed 's/-j//')
 
 
-## build with newer civetweb sources
+## replace included civetweb sources with updated version
 #rm -rf src/civetweb; mkdir -p src/civetweb
 #tar -C src/civetweb --strip-components=1 -zxf %{SOURCE1}
 
