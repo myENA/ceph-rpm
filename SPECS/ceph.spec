@@ -77,7 +77,6 @@ Group:		System/Filesystems
 %endif
 URL:		http://ceph.com/
 Source0:	http://download.ceph.com/tarballs/ceph-12.2.1.tar.gz
-##Source1:	https://github.com/myENA/civetweb/archive/ceph-updates.tar.gz
 %if 0%{?suse_version}
 %if 0%{?is_opensuse}
 ExclusiveArch:  x86_64 aarch64 ppc64 ppc64le
@@ -87,7 +86,6 @@ ExclusiveArch:  x86_64 aarch64 ppc64le s390x
 %endif
 
 Patch0001:	0001-Remove-assertions-in-IAM-Policy.patch
-##Patch0002:	0002-civetweb-updates.patch
 
 #################################################################################
 # dependencies that apply across all distro families
@@ -811,11 +809,6 @@ env | sort
 # extract the number of processors for use with cmake
 %define _smp_ncpus %(echo %{_smp_mflags} | sed 's/-j//')
 
-
-## replace included civetweb sources with updated version
-#rm -rf src/civetweb; mkdir -p src/civetweb
-#tar -C src/civetweb --strip-components=1 -zxf %{SOURCE1}
-
 mkdir build
 cd build
 cmake .. \
@@ -863,6 +856,7 @@ cmake .. \
     -DBOOST_J=%{_smp_ncpus}
 
 make %{?_smp_mflags}
+
 
 %if 0%{with make_check}
 %check
